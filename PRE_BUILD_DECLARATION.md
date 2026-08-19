@@ -3,7 +3,7 @@
 **Assignment #6 — Build a GER Pipeline**
 
 ## Content Type
-The GER pipeline generates **sentinel_evaluation** artifacts for Project Sentinel — structured JSON descriptions of game needs, success/failure states, retry guidance, and future warnings.
+Project Sentinel previously generated sentinel_evaluation artifacts manually, without automated GER, leading to inconsistent output. The GER pipeline generates **sentinel_evaluation** artifacts for Project Sentinel — structured JSON descriptions of game needs, success/failure states, retry guidance, and future warnings.
 
 ## GDD Rule
 Every piece must satisfy **GDD §3.3 — Sentinel Non-Authority**: the Sentinel/Relay must surface evidence for player interpretation and must not evaluate, decide, choose, recommend, or determine the player's conclusion.
