@@ -1,0 +1,57 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "ger_run_manifest.json",
+  "title": "GER Run Manifest",
+  "description": "Complete run manifest recording the full GER execution trace. Terminal state vocabulary only; transition logic implemented by Quality Gate (future phase).",
+  "type": "object",
+  "required": ["run_id", "attempt_number", "evaluation_trace", "refinement_trace", "started_at"],
+  "properties": {
+    "run_id": {
+      "type": "string",
+      "description": "Unique identifier for this GER run",
+      "minLength": 1
+    },
+    "attempt_number": {
+      "type": "integer",
+      "description": "Attempt number within this run (1 = initial generation, 2+ = refinements)",
+      "minimum": 1
+    },
+    "evaluation_trace": {
+      "type": "array",
+      "description": "Chronological trace of evaluation results for each attempt",
+      "items": {
+        "type": "object",
+        "description": "Evaluation result summary for trace purposes"
+      }
+    },
+    "refinement_trace": {
+      "type": "array",
+      "description": "Chronological trace of refinement attempts",
+      "items": {
+        "type": "object",
+        "description": "Refinement result summary for trace purposes"
+      }
+    },
+    "terminal_state": {
+      "type": "string",
+      "description": "Terminal state of the GER run. Vocabulary only; transition logic owned by Quality Gate.",
+      "enum": ["ACCEPT", "REJECT", "ESCALATE"],
+      "description": "ACCEPT = all criteria passed; REJECT = unrepairable failure after max retries; ESCALATE = requires human decision"
+    },
+    "started_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "UTC timestamp when the GER run started"
+    },
+    "completed_at": {
+      "type": ["string", "null"],
+      "format": "date-time",
+      "description": "UTC timestamp when the GER run completed (terminal state reached)"
+    },
+    "total_runtime_seconds": {
+      "type": ["number", "null"],
+      "description": "Total wall-clock runtime in seconds"
+    }
+  },
+  "additionalProperties": false
+}

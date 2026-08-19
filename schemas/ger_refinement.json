@@ -1,0 +1,76 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "ger_refinement.json",
+  "title": "GER Refinement Contracts",
+  "description": "Refinement request and result structures for GER pipeline",
+  "type": "object",
+  "required": [],
+  "properties": {
+    "RefinementRequest": {
+      "type": "object",
+      "required": ["failed_criteria", "actionable_feedback", "original_artifact_ref"],
+      "properties": {
+        "failed_criteria": {
+          "type": "array",
+          "description": "List of criterion findings that failed and require refinement",
+          "items": {
+            "type": "object",
+            "required": ["criterion_id", "criterion_name", "outcome", "reason", "evidence_refs", "severity"],
+            "properties": {
+              "criterion_id": { "type": "string", "minLength": 1 },
+              "criterion_name": { "type": "string", "minLength": 1 },
+              "outcome": { "type": "string", "enum": ["PASS", "FAIL"] },
+              "reason": { "type": "string", "minLength": 1 },
+              "evidence_refs": { "type": "array", "items": { "type": "string" } },
+              "severity": { "type": "string", "enum": ["critical", "major", "minor"] }
+            }
+          }
+        },
+        "actionable_feedback": {
+          "type": "array",
+          "description": "Specific actionable feedback for refinement",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "original_artifact_ref": {
+          "type": "string",
+          "description": "Reference/identifier for the original artifact being refined",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "RefinementResult": {
+      "type": "object",
+      "required": ["refined_artifact_ref", "criteria_addressed", "unresolved_or_new_issues"],
+      "properties": {
+        "refined_artifact_ref": {
+          "type": "string",
+          "description": "Reference to the refined artifact",
+          "minLength": 1
+        },
+        "criteria_addressed": {
+          "type": "array",
+          "description": "List of criterion IDs that were addressed by this refinement",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "unresolved_or_new_issues": {
+          "type": "array",
+          "description": "Any remaining or newly introduced issues after refinement",
+          "items": {
+            "type": "object",
+            "required": ["criterion_id", "criterion_name", "outcome", "reason", "evidence_refs", "severity"],
+            "properties": {
+              "criterion_id": { "type": "string", "minLength": 1 },
+              "criterion_name": { "type": "string", "minLength": 1 },
+              "outcome": { "type": "string", "enum": ["PASS", "FAIL"] },
+              "reason": { "type": "string", "minLength": 1 },
+              "evidence_refs": { "type": "array", "items": { "type": "string" } },
+              "severity": { "type": "string", "enum": ["critical", "major", "minor"] }
+            }
+          }
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

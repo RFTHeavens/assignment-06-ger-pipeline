@@ -1,0 +1,40 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "ger_evaluation.json",
+  "title": "GER Evaluation Result",
+  "description": "Result of evaluating a generated artifact against all criteria. Does not own final disposition.",
+  "type": "object",
+  "required": ["criteria_findings", "evaluator_warnings", "evidence_refs"],
+  "properties": {
+    "criteria_findings": {
+      "type": "array",
+      "description": "List of individual criterion evaluation findings",
+      "items": {
+        "type": "object",
+        "required": ["criterion_id", "criterion_name", "outcome", "reason", "evidence_refs", "severity"],
+        "properties": {
+          "criterion_id": { "type": "string", "minLength": 1 },
+          "criterion_name": { "type": "string", "minLength": 1 },
+          "outcome": { "type": "string", "enum": ["PASS", "FAIL"] },
+          "reason": { "type": "string", "minLength": 1 },
+          "evidence_refs": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "severity": { "type": "string", "enum": ["critical", "major", "minor"] }
+        }
+      }
+    },
+    "evaluator_warnings": {
+      "type": "array",
+      "description": "Non-critical warnings from the evaluator",
+      "items": { "type": "string" }
+    },
+    "evidence_refs": {
+      "type": "array",
+      "description": "References to evidence supporting this evaluation",
+      "items": { "type": "string" }
+    }
+  },
+  "additionalProperties": false
+}

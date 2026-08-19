@@ -1,0 +1,184 @@
+# Assignment #6 — Build a GER Pipeline
+
+## Overview
+
+This project implements a **Generate → Evaluate → Refine (GER) pipeline** for Assignment #6 of the ELVTR Multi-Agent AI Game Development course.
+
+The GER pipeline is a deterministic, offline Python pipeline that generates structured artifacts, evaluates them against deterministic criteria, and refines them through a bounded retry loop with a quality gate.
+
+**Pipeline Flow:**
+```
+GeneratorAdapter
+    ↓
+Evaluator
+    ↓
+QualityGate
+    ↓
+ACCEPT / RETRY / ESCALATE
+           ↓
+      RefinerAdapter
+           ↓
+         retry
+```
+
+**GERController** orchestrates the bounded loop with a maximum of 3 attempts.
+
+---
+
+## Architecture
+
+### Components
+
+| Component | File | Purpose |
+|-----------|------|---------|
+| **GER Contracts** | `src/ger_contracts.py` | Structured data contracts (EvaluationResult, CriterionFinding, RefinementRequest, GERManifest, TerminalState, CriterionOutcome) |
+| **GeneratorAdapter** | `src/generators/adapter.py` | Instance-based adapter with constructor injection for artifact generation |
+| **Evaluator** | `src/evaluator.py` | Deterministic evaluation against 8 criteria using injected critic/validator |
+| **QualityGate** | `src/quality_gate/gate.py` | Deterministic decision logic (ACCEPT/RETRY/ESCALATE) with circuit breaker |
+| **RefinerAdapter** | `src/refiner/adapter.py` | Instance-based refiner with provenance invariant enforcement |
+| **SentinelRefiner** | `src/refiner/sentinel.py` | Concrete refiner for sentinel_evaluation artifacts (wraps A4 critic) |
+| **GERController** | `src/controller/ger_controller.py` | Orchestrates the full pipeline loop |
+
+### JSON Schemas
+| Schema | Path | Purpose |
+|--------|------|---------|
+| `ger_evaluation.json` | `schemas/ger_evaluation.json` | EvaluationResult validation |
+| `ger_refinement.json` | `schemas/ger_refinement.json` | RefinementRequest/Result validation |
+| `ger_run_manifest.json` | `schemas/ger_run_manifest.json` | GERManifest trace validation |
+
+---
+
+## Quality-Gate Behavior
+
+The **QualityGate** implements deterministic decision logic:
+
+| Decision | Condition | Terminal State |
+|----------|-----------|----------------|
+| **ACCEPT** | All criteria PASS | `ACCEPT` |
+| **RETRY** | Failures present, attempts remaining, progress possible | None (continues loop) |
+| **ESCALATE** | Max attempts reached | `ESCALATE` |
+| **ESCALATE** | No-progress detected (same failures + unchanged artifact) | `ESCALATE` |
+
+**Circuit Breaker Features:**
+- Maximum 3 attempts (configurable via `max_attempts`)
+- No-progress detection: same failures + structurally unchanged artifact
+- No internal retry state; `max_attempts` supplied by controller
+- REJECT never emitted (only ACCEPT/RETRY/ESCALATE)
+
+---
+
+## Project Structure
+
+```
+assignment-06-ger-pipeline/
+├── requirements.txt
+├── schemas/
+│   ├── ger_evaluation.json
+│   ├── ger_refinement.json
+│   └── ger_run_manifest.json
+├── src/
+│   ├── __init__.py
+│   ├── ger_contracts.py
+│   ├── generators/
+│   │   ├── __init__.py
+│   │   └── adapter.py
+│   ├── evaluator.py
+│   ├── quality_gate/
+│   │   ├── __init__.py
+│   │   └── gate.py
+│   ├── refiner/
+│   │   ├── __init__.py
+│   │   ├── adapter.py
+│   │   └── sentinel.py
+│   ├── controller/
+│   │   └── ger_controller.py
+│   └── __init__.py
+└── tests/
+    ├── __init__.py
+    ├── test_controller.py
+    ├── test_evaluator.py
+    ├── test_generator_adapter.py
+    ├── test_quality_gate.py
+    └── test_refiner.py
+
+Excluded from source control:
+- .venv/
+- .pytest_cache/
+- __pycache__/
+- *.pyc
+```
+
+---
+
+## Dependencies
+
+From `requirements.txt`:
+```
+pytest
+jsonschema
+```
+
+---
+
+## Setup
+
+```bash
+# Create virtual environment
+python3 -m venv .venv
+source .venv/bin/activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Run tests
+.venv/bin/pytest -v
+```
+
+---
+
+## Testing
+
+**Final Verified Result:**
+- **111 passed / 0 failed**
+
+Test modules:
+- `tests/test_controller.py`
+- `tests/test_evaluator.py`
+- `tests/test_generator_adapter.py`
+- `tests/test_quality_gate.py`
+- `tests/test_refiner.py`
+
+---
+
+## Design Properties
+
+| Property | Supported |
+|----------|-----------|
+| Deterministic/offline testing | ✅ |
+| Dependency injection | ✅ |
+| Structured contracts (dataclasses + JSON schemas) | ✅ |
+| Bounded retries (max 3) | ✅ |
+| Explicit terminal states (ACCEPT/RETRY/ESCALATE) | ✅ |
+| Provenance preservation (retrieved_context_ids invariant) | ✅ |
+| No-progress detection | ✅ |
+| Explicit contracts (dataclasses + JSON schemas) | ✅ |
+| No mutable global registries | ✅ |
+
+---
+
+## Unreal / Project Sentinel Relationship
+
+- **Project Sentinel** game/runtime is being built in **Unreal Engine 5.8**
+- **Assignment #6 GER/agent logic** is implemented in **Python** (this repository)
+- **Unreal integration is NOT part of this gate** — the GER pipeline is a standalone Python pipeline
+- Future Unreal integration may use validated structured data/interfaces, but no bridge currently exists
+- Assignment #6 is separate from Assignment #5 (Goal-Oriented Coding Agent / Observation Terminal / Unreal demo)
+
+---
+
+## Status
+
+- **Implementation:** Complete
+- **Final Verified Regression:** **111 passed / 0 failed**
+- **Implementation Frozen:** YES
+- **Additional Implementation Required:** NO
